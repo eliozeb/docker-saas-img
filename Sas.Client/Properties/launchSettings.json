@@ -1,0 +1,14 @@
+{
+        "profiles": {
+        "SasClient": {
+        "commandName": "Project",
+        "dotnetRunMessages": true,
+        "launchBrowser": true,
+        "inspectUri": "{wsProtocol}://{url.hostname}: {url.port}/_framework/debug/wsproxy?browser={browserInspectUri}",
+        "applicationUrl": "http://localhost:5900",
+        "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+        }
+      }
+    }
+  }

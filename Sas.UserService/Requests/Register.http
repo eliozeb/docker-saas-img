@@ -1,0 +1,10 @@
+@hotst =http://localhost:5200
+POST {{hotst}}/auth/register
+Content-Type: application/json;
+
+{
+    "firstName": "johnDoe",
+    "lastName": "johnDoe",
+    "email": "johnDoe@example.com",
+    "password": "password123"
+}

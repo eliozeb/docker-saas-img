@@ -1,0 +1,173 @@
+﻿@page "/tenants"
+@inject HttpClient httpClient
+<div class="row">
+    <div class="col-md-4">
+        <h3>Tenants</h3>
+            <ul class="list-group">
+            @foreach (var tenant in TenantList)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span @onclick="() => ShowDetails(tenant)">@tenant.TenantName</span>
+                    <span @onclick="() => ShowDetails(tenant)">@tenant.Subscription</span>
+                    <span @onclick="() => ShowDetails(tenant)">@tenant.CreatedAt</span>
+                    <div>
+                        <i class="oi oi-eye mr-2 text-primary" @onclick="() => ShowDetails(tenant)"></i>
+                        <i class="oi oi-pencil mr-2 text-primary" @onclick="() => EditTenant(tenant)"></i>
+                        <i class="oi oi-trash text-danger" @onclick="() => DeleteTenant(tenant)"></i>
+                    </div>
+                </li>
+            }
+        </ul>
+        <button class="btn btn-primary mt-3" @onclick="AddTenant">Add Tenant</button>
+    </div>
+    <div class="col-md-8">
+        <h3>Tenants Details</h3>
+
+        @if (SelectedTenant != null)
+        {
+            <div class="card">
+                <div class="card-body">
+                    @if (!IsEditing)
+                    {
+                        <h5 class="card-title">@SelectedTenant.TenantName</h5>
+                        <p class="card-text">@SelectedTenant.Subscription</p>
+                        <p class="card-text">@SelectedTenant.CreatedAt</p>
+                        <button class="btn btn-danger mt-3" @onclick="() => DeleteTenant(SelectedTenant)">Delete Tenant</button>
+                        <button class="btn btn-primary mt-3" @onclick="() => ShowEditForm()">Edit Tenant</button>
+                    }
+                    else
+                    {
+                        <form>
+                            <div class="form-group">
+                                <label for="edit-habit-name">Tenant Name</label>
+                                <input type="text" class="form-control" id="edit-habit-name" placeholder="Enter tenant name" @bind-value="EditingTenant!.TenantName" />
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-habit-description">Subscription</label>
+                                <textarea class="form-control" id="edit-habit-description" rows="3" @bind="EditingTenant.Subscription"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-habit-description">CreatedAt</label>
+                                <textarea class="form-control" id="edit-habit-description" rows="3" @bind="EditingTenant.CreatedAt"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3" @onclick="() => SaveTenant()">Save</button>
+                            <button type="button" class="btn btn-secondary mt-3" @onclick="() => CancelEdit()">Cancel</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    private const string ServiceEndpoint = "http://localhost:5300/gateway/tenants";
+    @* private List<Tenant> TenantList { get; set; } = new List<Tenant>()
+    {
+        new Tenant { Subscription = "Premium", TenantName ="AscendTech", CreatedAt= DateTime.UtcNow },
+        new Tenant { Subscription = "Standard", TenantName = "Bluewave", CreatedAt= DateTime.UtcNow },
+        new Tenant { Subscription = "Free", TenantName ="SpecialistAlarmServices", CreatedAt= DateTime.UtcNow },
+        new Tenant { Subscription = "Premium", TenantName ="CloudSphere", CreatedAt= DateTime.UtcNow },
+        new Tenant { Subscription = "Standard", TenantName ="Datastream", CreatedAt= DateTime.UtcNow },
+    }; *@
+
+    private List<Tenant> TenantList { get; set; } = new List<Tenant>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        httpClient.DefaultRequestHeaders.Add("tenant","AscendTech");
+        TenantList = await httpClient.GetFromJsonAsync<List<Tenant>>($"{ServiceEndpoint}") ?? new List<Tenant>();
+    }
+
+    private class CreateTenant
+    {
+        public string Subscription { get; set; } = default!;
+        public string TenantName { get; set; } = default!;
+        public DateTime CreatedAt {get; set;}
+
+    }
+    private class UpdateTenant
+    {
+        public string Subscription { get; set; } = default!;
+        public string TenantName { get; set; } = default!;
+        public DateTime CreatedAt {get; set;}
+    }
+
+    private class Tenant
+    {
+        public int Id { get; set; }
+        public string Subscription { get; set; } = default!;
+        public string TenantName { get; set; } = default!;
+        public DateTime CreatedAt {get; set;}
+    }
+
+    private Tenant? SelectedTenant { get; set; }
+    private Tenant? EditingTenant { get; set; }
+    private Tenant? AddingTenant { get; set; }
+    private bool IsEditing { get; set; } = false;
+
+    private void ShowDetails(Tenant tenant)
+    {
+        SelectedTenant = tenant;
+        IsEditing = false;
+    }
+
+    private async Task AddTenant()
+    {
+        var newTenant = new CreateTenant()
+        {
+            Subscription = "New Tenant",
+            TenantName = "Enter a description here",
+            CreatedAt= DateTime.UtcNow
+        };
+
+            var response = await httpClient .PostAsJsonAsync(ServiceEndpoint, newTenant);
+            var tenant = await response.Content.ReadFromJsonAsync<Tenant>();
+            // Add the new tenant to the list of tenants
+            TenantList.Add(tenant!);
+            SelectedTenant = tenant;
+    }
+
+    private void EditTenant(Tenant tenant)
+    {
+        SelectedTenant = tenant;
+        ShowEditForm();
+    }
+
+    private void DeleteTenant(Tenant tenant)
+    {
+        httpClient.DeleteAsync($"{ServiceEndpoint}/{tenant.Id}");
+        TenantList.Remove(tenant);
+        if (SelectedTenant == tenant)
+        {
+            SelectedTenant = null;
+        }
+    }
+
+    private void ShowEditForm()
+    {
+        IsEditing = true;
+        EditingTenant = new Tenant() {
+        Id = SelectedTenant!.Id,
+        Subscription = SelectedTenant!.Subscription,
+        TenantName = SelectedTenant!.TenantName,
+        CreatedAt = SelectedTenant!.CreatedAt
+        };
+    }
+
+    private void SaveTenant()
+    {
+        httpClient.PutAsJsonAsync($"{ServiceEndpoint}/{EditingTenant!.Id}",EditingTenant);
+        TenantList.Add(EditingTenant!);
+        TenantList.Remove(SelectedTenant!);
+        IsEditing = false;
+        SelectedTenant = null;
+    }
+
+    private void CancelEdit()
+    {
+        IsEditing = false;
+        EditingTenant = null;
+        SelectedTenant = null;
+    }
+
+}

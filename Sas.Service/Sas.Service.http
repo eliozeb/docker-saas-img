@@ -1,0 +1,6 @@
+@Sas.Service_HostAddress = http://localhost:5100
+
+GET {{Sas.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

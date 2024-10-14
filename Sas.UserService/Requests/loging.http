@@ -1,0 +1,8 @@
+@hotst =http://localhost:5200
+POST {{hotst}}/auth/login
+Content-Type: application/json;
+
+{
+    "email": "johnDoe@example.com",
+    "password": "password123"
+}

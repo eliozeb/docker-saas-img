@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "RunClient",
+            "type": "blazorwasm",
+            "request": "launch",
+            "preLaunchTask": "build-client",
+            "cwd": "${workspaceFolder}/Sas.Client",
+            "url": "https://localhost:5900"
+        },
+        {
+            "name": "RunSasService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-sas-service",
+            "program": "${workspaceFolder}/Sas.Service/bin/Debug/net8.0/Sas.Service.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Sas.Service",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "RunUserService",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-user-service",
+            "program": "${workspaceFolder}/Sas.UserService/bin/Debug/net8.0/Sas.UserService.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Sas.UserService",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "RunApiGateway",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-api-gateway",
+            "program": "${workspaceFolder}/Sas.ApiGateway/bin/Debug/net8.0/Sas.ApiGateway.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Sas.ApiGateway",
+            "stopAtEntry": false,
+            "console": "integratedTerminal"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Run Server",
+            "configurations": [
+                "RunSasService",
+                "RunUserService",
+                "RunApiGateway"
+            ]
+        },
+        {
+            "name": "Run All",
+            "configurations": [
+                "RunSasService",
+                "RunClient",
+                "RunUserService",
+                "RunApiGateway"
+            ]
+        }
+    ]
+}

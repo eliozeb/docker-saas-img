@@ -1,0 +1,6 @@
+@Sas.ApiGateway_HostAddress = http://localhost:5080
+
+GET {{Sas.ApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
